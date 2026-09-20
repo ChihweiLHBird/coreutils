@@ -83,6 +83,10 @@ jobs:
     env:
       CARGO_INCREMENTAL: 0
     strategy:
+      # A single flaky job (network hiccup while downloading the CodSpeed
+      # runner, for example) must not cancel the benchmarks of every other
+      # package.
+      fail-fast: false
       # Stagger the jobs: 70 concurrent runners hitting the GitHub cache API
       # (rust-cache + sccache + CodSpeed) at once triggers HTTP 429s.
       max-parallel: 12

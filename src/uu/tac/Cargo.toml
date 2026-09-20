@@ -28,9 +28,17 @@ thiserror = { workspace = true }
 fluent = { workspace = true }
 tempfile = { workspace = true }
 
+[dev-dependencies]
+divan = { workspace = true }
+uucore = { workspace = true, features = ["benchmark"] }
+
 [lints]
 workspace = true
 
 [[bin]]
 name = "tac"
 path = "src/main.rs"
+
+[[bench]]
+name = "tac_bench"
+harness = false

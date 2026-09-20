@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD033 MD041 MD002 -->
 <!-- markdownlint-disable commands-show-output no-duplicate-heading -->
-<!-- spell-checker:ignore markdownlint ; (options) DESTDIR UTILNAME manpages reimplementation oranda libclang libcrypto FIPS -->
+<!-- spell-checker:ignore markdownlint utm ; (options) DESTDIR UTILNAME manpages reimplementation oranda libclang libcrypto FIPS -->
 <div class="oranda-hide">
 <div align="center">
 
@@ -14,6 +14,7 @@
 [![dependency status](https://deps.rs/repo/github/uutils/coreutils/status.svg)](https://deps.rs/repo/github/uutils/coreutils)
 
 [![CodeCov](https://codecov.io/gh/uutils/coreutils/branch/main/graph/badge.svg)](https://codecov.io/gh/uutils/coreutils)
+[![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://app.codspeed.io/ChihweiLHBird/coreutils?utm_source=badge)
 [![Weblate](https://hosted.weblate.org/widget/rust-coreutils/svg-badge.svg)](https://hosted.weblate.org/projects/rust-coreutils/)
 
 </div>

@@ -3603,8 +3603,10 @@ name = "uu_head"
 version = "0.13.0"
 dependencies = [
  "clap",
+ "codspeed-divan-compat",
  "fluent",
  "memchr",
+ "tempfile",
  "thiserror 2.0.20",
  "uucore",
 ]
@@ -3892,7 +3894,9 @@ name = "uu_paste"
 version = "0.13.0"
 dependencies = [
  "clap",
+ "codspeed-divan-compat",
  "fluent",
+ "tempfile",
  "uucore",
 ]
 
@@ -4225,6 +4229,7 @@ name = "uu_tac"
 version = "0.13.0"
 dependencies = [
  "clap",
+ "codspeed-divan-compat",
  "fluent",
  "libc",
  "memchr",
@@ -4240,12 +4245,14 @@ name = "uu_tail"
 version = "0.13.0"
 dependencies = [
  "clap",
+ "codspeed-divan-compat",
  "fluent",
  "libc",
  "memchr",
  "notify",
  "rstest",
  "rustix",
+ "tempfile",
  "uucore",
  "windows-sys 0.61.2",
 ]

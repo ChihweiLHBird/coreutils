@@ -39,6 +39,9 @@ windows-sys = { workspace = true, features = [
 ] }
 
 [dev-dependencies]
+divan = { workspace = true }
+tempfile = { workspace = true }
+uucore = { workspace = true, features = ["benchmark"] }
 rstest = { workspace = true }
 
 [features]
@@ -50,3 +53,7 @@ workspace = true
 [[bin]]
 name = "tail"
 path = "src/main.rs"
+
+[[bench]]
+name = "tail_bench"
+harness = false

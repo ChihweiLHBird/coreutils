@@ -1,7 +1,7 @@
 name: Benchmarks
 
 # spell-checker:ignore (people) taiki-e
-# spell-checker:ignore (misc) codspeed sccache
+# spell-checker:ignore (misc) backtest codspeed sccache
 
 on:
   pull_request:
@@ -15,6 +15,9 @@ on:
     branches:
       - main
     paths: *bench_paths
+  # `workflow_dispatch` allows CodSpeed to trigger backtest
+  # performance analysis in order to generate initial data.
+  workflow_dispatch:
 
 permissions:
   contents: read # to fetch code (actions/checkout)
@@ -39,19 +42,24 @@ jobs:
       - id: detect
         shell: bash
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            base="${{ github.event.pull_request.base.sha }}"
-          else
-            # for push diff of the previous
-            base="${{ github.event.before }}"
-          fi
-
-          changed=$(git diff --name-only "$base" "${{ github.sha }}")
-
-          if echo "$changed" | grep -qE '^(Cargo\.(toml|lock)|src/(uucore|uucore_procs)/)'; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # manual (or CodSpeed backtest) run: benchmark everything
             candidates=$(ls src/uu)
           else
-            candidates=$(echo "$changed" | awk -F'/' '/^src\/uu\// {print $3}' | sort -u)
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              base="${{ github.event.pull_request.base.sha }}"
+            else
+              # for push diff of the previous
+              base="${{ github.event.before }}"
+            fi
+
+            changed=$(git diff --name-only "$base" "${{ github.sha }}")
+
+            if echo "$changed" | grep -qE '^(Cargo\.(toml|lock)|src/(uucore|uucore_procs)/)'; then
+              candidates=$(ls src/uu)
+            else
+              candidates=$(echo "$changed" | awk -F'/' '/^src\/uu\// {print $3}' | sort -u)
+            fi
           fi
 
           package=$(for pkg in $candidates;
@@ -69,9 +77,16 @@ jobs:
     name: Run ${{ matrix.type }} benchmarks for ${{ matrix.package }} (CodSpeed)
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: read # to fetch code (actions/checkout)
+      id-token: write # to authenticate with CodSpeed through OIDC
     env:
       CARGO_INCREMENTAL: 0
     strategy:
+      # A single flaky job (network hiccup while downloading the CodSpeed
+      # runner, for example) must not cancel the benchmarks of every other
+      # package.
+      fail-fast: false
       # Stagger the jobs: 70 concurrent runners hitting the GitHub cache API
       # (rust-cache + sccache + CodSpeed) at once triggers HTTP 429s.
       max-parallel: 12
@@ -121,4 +136,3 @@ jobs:
           run: |
             echo "Running ${{ matrix.type }} benchmarks for ${{ matrix.package }}"
             cargo codspeed run -p ${{ matrix.package }} > /dev/null
-          token: ${{ secrets.CODSPEED_TOKEN }}

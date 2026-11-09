@@ -434,28 +434,29 @@ pub fn read_yes() -> bool {
     std::io::stdin().read_line(&mut s).is_ok() && matches!(s.chars().next(), Some('y' | 'Y'))
 }
 
-/// Return `io::stdout()`, or, if stdout was closed at startup (Rust then
-/// reopens it as `/dev/null`), a line-buffered writer that fails with EBADF.
+/// Return a line-buffered stdout writer that reports write errors.
+/// A closed stdout is reopened read-only at startup, so writes fail with
+/// EBADF, but `io::stdout()` ignores EBADF before Rust 1.102.
 /// Flush it at the end, or the error of a partial last line is lost.
 pub fn stdout_writer() -> Box<dyn std::io::Write> {
     #[cfg(all(has_signals, unix))]
-    if signals::stdout_was_closed() {
-        /// A writer that fails like a closed file descriptor.
-        struct ClosedStdout;
+    {
+        /// A writer that writes to fd 1 directly.
+        struct RawStdout;
 
-        impl std::io::Write for ClosedStdout {
-            fn write(&mut self, _buf: &[u8]) -> std::io::Result<usize> {
-                Err(Errno::EBADF.into())
+        impl std::io::Write for RawStdout {
+            fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+                Ok(nix::unistd::write(std::io::stdout(), buf)?)
             }
 
-            // With no output, a closed stdout is not an error.
             fn flush(&mut self) -> std::io::Result<()> {
                 Ok(())
             }
         }
 
-        return Box::new(std::io::LineWriter::new(ClosedStdout));
+        Box::new(std::io::LineWriter::new(RawStdout))
     }
+    #[cfg(not(all(has_signals, unix)))]
     Box::new(std::io::stdout())
 }
 
